@@ -143,13 +143,13 @@ struct ThreadMgrState {
   ThreadHandle recycler_handle;
   volatile WorkerState *recycler_state;
   ThreadHandle *thread_handles;
-  WorkerState volatile **worker_states;
+  volatile WorkerState **worker_states;
 };
 QUICKTASK_TYPEDEF_STRUCT(ThreadMgrState);
 
 union Payload {
-  QuickTask_Range volatile range;
-  QuickTask_Node volatile *child_node;
+  volatile QuickTask_Range range;
+  volatile QuickTask_Node *child_node;
 };
 typedef union Payload Payload;
 
@@ -1180,9 +1180,9 @@ int quicktask_deinit() {
 void interrupt_workers() {
   lock(&State->mx);
   size_t const num_threads = State->num_workers;
-  WorkerState volatile **ws_ptrs = State->worker_states;
+  volatile WorkerState **ws_ptrs = State->worker_states;
   for (size_t i = 0; i!=num_threads; ++i) {
-    WorkerState volatile *ws = ws_ptrs[i];
+    volatile WorkerState *ws = ws_ptrs[i];
     if (ws) {
       //printf("Interrupting ws %p\n", ws);
       if (!ws->is_interrupted) {
@@ -1194,7 +1194,7 @@ void interrupt_workers() {
   unlock(&State->mx);
 
   for (size_t i = 0; i!=num_threads; ++i) {
-    WorkerState volatile *ws;
+    volatile WorkerState *ws;
     do {
       lock(&State->mx);
       full_memory_barrier();
