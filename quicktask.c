@@ -684,7 +684,7 @@ int try_ascent_to_split(QuickTask_Node **inout_node) {
     lock(&n->mx);
     if (!check_has_split_open(n, &ix)) {
       QuickTask_Node *p = (QuickTask_Node*) n->parent;
-      unlock(&n->mx);
+      unlock(&n->mx);  // Strategy: lock parent before child 
       if (p) {
         //printf("Going up to %p\n", p);
         lock(&p->mx);
@@ -741,7 +741,7 @@ int try_join(QuickTask_Node **inout_node, TaskDetail *out_td,
       return 1;
     }
     if (!try_ascent_to_split(inout_node)) {
-      //printf("Didn't find a task after descent\n");
+      //printf("Didn't find a task after descent-ascent\n");
       return 0;
     }
     thread_sleep(1);  // TODO(bas) Consider utility of sleep after not finding a good split in try_join()
@@ -1309,7 +1309,7 @@ int quicktask_insert_task(QuickTask_TaskFun fun,
     return QUICKTASK_SUCCESS;
   } else {
     QuickTask_Node *node;
-    ec = take_free_node(&node);  // Should use loop with double check instead
+    ec = take_free_node(&node);  // TODO Should unlock first, then lock and double-check
     if (ec) {
       unlock(&root->mx);
       unlock(&RootH->mx);
