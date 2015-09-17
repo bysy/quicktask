@@ -734,7 +734,6 @@ int try_join(QuickTask_Node **inout_node, TaskDetail *out_td,
   //printf("in %s from (%p) \n", __func__, (void*) *inout_node);
 #endif
   for (;;) {
-    //interruption_point(inout_ws);
     //printf("SPIN\n");
     if (try_descent_to_task(inout_node, out_td, out_ix)) {
       //printf("Found a task after descent\n");
@@ -742,10 +741,10 @@ int try_join(QuickTask_Node **inout_node, TaskDetail *out_td,
     }
     if (!try_ascent_to_split(inout_node)) {
       //printf("Didn't find a task after descent-ascent\n");
+      thread_sleep(1);
       return 0;
     }
-    thread_sleep(1);  // TODO(bas) Consider utility of sleep after not finding a good split in try_join()
-                      //           Shouldn't the sleep happen before the return 0? Or not at all?
+    interruption_point(inout_ws);
   }
 }
 // **** try_enter_tree()
